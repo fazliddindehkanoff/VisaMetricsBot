@@ -33,12 +33,14 @@ class Customer(Base):
     last_name = Column(String)
     nationality = Column(String)
     birth_date = Column(Date)
+    address = Column(String)
     passport_number = Column(Integer)
     passport_valid_date = Column(Date)
     email = Column(String)
-    phone_number = Column(Integer)
-    ordered = Column(Boolean)
-    plan = Column(String)
+    phone_number = Column(String)
+    is_registered = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
+    plan = Column(String, default="Monthly")
 
     def __repr__(self):
         return f"Customer(id={self.id}, first_name={self.first_name}, last_name={self.last_name}, email={self.email})"

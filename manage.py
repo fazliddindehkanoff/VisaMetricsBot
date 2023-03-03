@@ -4,7 +4,7 @@ import alembic.config
 
 from alembic import command as alembic_command
 from dotenv import load_dotenv
-from bot import main
+from bot_settings import main
 
 load_dotenv()
 

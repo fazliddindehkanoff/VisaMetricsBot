@@ -5,7 +5,7 @@ from common.constants import *
 keyboards = [
         [
             InlineKeyboardButton(MONTHLY_VISA, callback_data=MONTHLY_VISA_CALLBACK),
-            InlineKeyboardButton(EXPRESS_VISA_CALLBACK, callback_data=EXPRESS_VISA_CALLBACK),
+            InlineKeyboardButton(EXPRESS_VISA, callback_data=EXPRESS_VISA_CALLBACK),
         ],
     ]
 

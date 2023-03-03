@@ -5,9 +5,13 @@ from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 
 load_dotenv()
-db_name = os.environ.get('DB_NAME')
+# database credentials
+username = os.environ.get("POSTGRES_USER")
+password = os.environ.get("POSTGRES_PASSWORD")
+database_name = os.environ.get("POSTGRES_DB")
+port = os.environ.get("PORT")
 
-engine = create_engine(f'sqlite:///{db_name}.db', echo=True)
+engine = create_engine(f"postgresql://{username}:{password}@db:{port}/{database_name}")
 Session = sessionmaker(bind=engine)
 
 def get_session():

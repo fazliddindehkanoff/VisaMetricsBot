@@ -8,8 +8,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Make database migrations
-RUN python manage.py makemigrations
-RUN python manage.py migrate
-
 CMD ["python", "main.py", "run-bot"]
