@@ -7,8 +7,8 @@ from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, Messa
 from sqlalchemy.orm import sessionmaker
 
 from models import User, engine, Base
-from InlineKeyboard.MainMenuBtns import menu_keyboards
-from InlineKeyboard.ConstantKeyboards import back_button
+from inline_keyboard.main_menu_btns import menu_keyboards
+from inline_keyboard.constant_keyboards import back_button
 
 from common.constants import *
 

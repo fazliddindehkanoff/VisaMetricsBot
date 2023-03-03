@@ -1,14 +1,17 @@
-import multiprocessing
 from datetime import datetime, timedelta
+from typing import List
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
 from captcha_solver import captcha_solver
+from models import Customer
 
-def select_option_by_text(select_elem, text):
+
+def select_option_by_text(select_elem: WebElement, text: str) -> None:
     """Select an option from a dropdown by text."""
     options = Select(select_elem).options
     for option in options:
@@ -16,7 +19,7 @@ def select_option_by_text(select_elem, text):
             option.click()
             break
 
-def select_birthday(driver: webdriver.Firefox, date):
+def select_birthday(driver: webdriver.Firefox, date: str) -> None:
     """Select the birth date of the customer."""
     year, month, day = date.split('-')
     print(day, month, year)
@@ -24,14 +27,14 @@ def select_birthday(driver: webdriver.Firefox, date):
     select_option_by_text(driver.find_element(By.ID, 'birthmonth1'), month)
     select_option_by_text(driver.find_element(By.ID, 'birthyear1'), year)
 
-def fill_personal_info(driver: webdriver.Firefox, customer):
+def fill_personal_info(driver: webdriver.Firefox, customer: Customer) -> None:
     """Fill the personal information section of the form."""
     driver.find_element(By.ID, 'name1').send_keys(customer.first_name)
     driver.find_element(By.ID, 'surname1').send_keys(customer.last_name)
     driver.find_element(By.ID, 'localname1').send_keys(customer.first_name + ' ' + customer.last_name)
     select_option_by_text(driver.find_element(By.ID, 'nationality1'), 'Uzbekistan')
     select_birthday(driver, customer.birth_date.strftime('%Y-%m-%d'))
-    driver.find_element(By.ID, 'passport1').send_keys(customer.passport_number)
+    driver.find_element(By.ID, 'passport1').send_keys(customer.passport_number+2)
     driver.execute_script(
         f"arguments[0].value = '{customer.passport_valid_date.strftime('%d-%m-%Y')}';",
         driver.find_element(By.ID, 'passportExpirationDate1')
@@ -39,10 +42,17 @@ def fill_personal_info(driver: webdriver.Firefox, customer):
     driver.find_element(By.ID, 'email1').send_keys(customer.email)
     driver.find_element(By.ID, 'phone1').send_keys(customer.phone_number)
 
-def fill_form(driver: webdriver.Firefox, customer):
+def select_day(driver: webdriver.Firefox, days: List[WebElement], order_by: str) -> None:
+    """Select a day from the calendar based on the specified order."""
+    if order_by == 'increase':
+        day_to_click = days[0]
+    else:
+        day_to_click = days[-1]
+    day_to_click.click()
+
+def fill_form(driver: webdriver.Firefox, customer: Customer) -> None:
     """Fill the entire form."""
-    p = multiprocessing.Process(target=captcha_solver)
-    p.start()
+
     order_by = "increase"
     wait = WebDriverWait(driver, 10)
 
@@ -70,22 +80,22 @@ def fill_form(driver: webdriver.Firefox, customer):
     driver.execute_script("arguments[0].style.display = 'block';", datepicker)
     driver.find_element(By.XPATH, "//input[@class='form-control calendarinput']").click()
     days = driver.find_elements(By.XPATH, "//td[@class='day']")
-    days_text = [day.text for day in days]
-    print(days_text)
-    input()
-    day_to_click = days[0] if order_by == 'increase' else days[-1]
-    day_to_click.click()
+
+    select_day(driver, days, order_by)
 
     wait.until(EC.visibility_of_element_located((By.XPATH, "//button[contains(@class, 'noPrime')]"))).click()
     driver.find_element(By.ID, 'btnAppCalendarNext').click()
 
-    p.join()
-    code = p.result()
-    print(code)
+    code = captcha_solver()
 
     while code == "ERROR_CAPTCHA_UNSOLVABLE":
         code = captcha_solver()
 
     driver.execute_script(f"document.getElementById('g-recaptcha-response').innerHTML = '{code}'")
     driver.find_element(By.ID, 'btnAppServicesNext').click()
+    driver.implicitly_wait(3)
+    driver.switch_to.default_content()
+    driver.implicitly_wait(3)
+    print(driver.find_elements(By.TAG_NAME, "a")[-1].get_attribute("href"))    
+
     driver.quit()

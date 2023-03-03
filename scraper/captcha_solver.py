@@ -20,3 +20,4 @@ def captcha_solver() -> str:
 
     else:
         return result.get("code")
+    
